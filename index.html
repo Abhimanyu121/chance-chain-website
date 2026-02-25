@@ -1,0 +1,670 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Raffle Protocol</title>
+    <link
+        href="https://fonts.googleapis.com/css2?family=DM+Mono:ital,wght@0,300;0,400;0,500;1,300&family=Syne:wght@400;500;600;700;800&display=swap"
+        rel="stylesheet">
+    <style>
+        :root {
+            --bg: #0a0a0a;
+            --fg: #f0ede6;
+            --accent: #c8f060;
+            --muted: #3a3a3a;
+            --subtle: #888;
+        }
+
+        *,
+        *::before,
+        *::after {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        html {
+            scroll-behavior: smooth;
+        }
+
+        body {
+            background: var(--bg);
+            color: var(--fg);
+            font-family: 'DM Mono', monospace;
+            font-size: 14px;
+            line-height: 1.6;
+            overflow-x: hidden;
+        }
+
+        /* noise overlay */
+        body::before {
+            content: '';
+            position: fixed;
+            inset: 0;
+            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.04'/%3E%3C/svg%3E");
+            pointer-events: none;
+            z-index: 999;
+            opacity: 0.4;
+        }
+
+        nav {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 28px 48px;
+            border-bottom: 1px solid var(--muted);
+            animation: fadeDown 0.6s ease both;
+        }
+
+        .logo {
+            font-family: 'Syne', sans-serif;
+            font-weight: 800;
+            font-size: 16px;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+            color: var(--fg);
+            text-decoration: none;
+            display: inline-block;
+            transition: transform 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+
+        .logo:hover {
+            transform: scale(1.07);
+        }
+
+        .logo span {
+            color: var(--accent);
+        }
+
+        nav a.cta {
+            font-family: 'DM Mono', monospace;
+            font-size: 11px;
+            letter-spacing: 0.12em;
+            text-transform: uppercase;
+            color: var(--bg);
+            background: var(--accent);
+            padding: 8px 20px;
+            text-decoration: none;
+            display: inline-block;
+            transition: transform 0.25s cubic-bezier(0.34, 1.56, 0.64, 1), opacity 0.2s;
+        }
+
+        nav a.cta:hover {
+            opacity: 0.9;
+            transform: scale(1.07);
+        }
+
+        /* HERO */
+        .hero {
+            padding: 120px 48px 80px;
+            max-width: 960px;
+            animation: fadeUp 0.8s ease 0.1s both;
+        }
+
+        .hero-label {
+            font-size: 10px;
+            letter-spacing: 0.2em;
+            text-transform: uppercase;
+            color: var(--accent);
+            margin-bottom: 24px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .hero-label::after {
+            content: '';
+            width: 32px;
+            height: 1px;
+            background: var(--accent);
+        }
+
+        h1 {
+            font-family: 'Syne', sans-serif;
+            font-weight: 800;
+            font-size: clamp(42px, 8vw, 88px);
+            line-height: 0.95;
+            letter-spacing: -0.02em;
+            color: var(--fg);
+            margin-bottom: 40px;
+        }
+
+        h1 em {
+            font-style: normal;
+            color: var(--accent);
+        }
+
+        .hero-sub {
+            font-size: 13px;
+            color: var(--subtle);
+            max-width: 460px;
+            line-height: 1.8;
+        }
+
+        /* DIVIDER */
+        .divider {
+            height: 1px;
+            background: var(--muted);
+            margin: 0 48px;
+        }
+
+        /* FLOW */
+        .flow {
+            padding: 80px 48px;
+            animation: fadeUp 0.8s ease 0.2s both;
+        }
+
+        .section-label {
+            font-size: 10px;
+            letter-spacing: 0.2em;
+            text-transform: uppercase;
+            color: var(--subtle);
+            margin-bottom: 48px;
+        }
+
+        .steps {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 0;
+            border: 1px solid var(--muted);
+        }
+
+        .step {
+            padding: 40px 32px;
+            border-right: 1px solid var(--muted);
+            position: relative;
+            transition: background 0.3s, transform 0.25s cubic-bezier(0.34, 1.56, 0.64, 1), z-index 0s;
+            z-index: 0;
+        }
+
+        .step:last-child {
+            border-right: none;
+        }
+
+        .step:hover {
+            background: rgba(200, 240, 96, 0.06);
+            transform: scale(1.04);
+            z-index: 2;
+        }
+
+        .step-num {
+            font-size: 10px;
+            letter-spacing: 0.15em;
+            color: var(--muted);
+            margin-bottom: 20px;
+        }
+
+        .step-title {
+            font-family: 'Syne', sans-serif;
+            font-weight: 700;
+            font-size: 15px;
+            color: var(--fg);
+            margin-bottom: 12px;
+            line-height: 1.2;
+        }
+
+        .step p {
+            font-size: 12px;
+            color: var(--subtle);
+            line-height: 1.7;
+        }
+
+        /* RULES */
+        .rules {
+            padding: 80px 48px;
+        }
+
+        .rules-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1px;
+            background: var(--muted);
+            border: 1px solid var(--muted);
+        }
+
+        .rule {
+            background: var(--bg);
+            padding: 36px 40px;
+            transition: background 0.3s, transform 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
+            animation: fadeUp 0.5s ease both;
+            position: relative;
+            z-index: 0;
+        }
+
+        .rule:hover {
+            background: #111;
+            transform: scale(1.03);
+            z-index: 2;
+        }
+
+        .rule-key {
+            font-size: 10px;
+            letter-spacing: 0.15em;
+            text-transform: uppercase;
+            color: var(--accent);
+            margin-bottom: 10px;
+        }
+
+        .rule-val {
+            font-family: 'Syne', sans-serif;
+            font-weight: 600;
+            font-size: 16px;
+            color: var(--fg);
+            margin-bottom: 8px;
+        }
+
+        .rule-why {
+            font-size: 11px;
+            color: var(--subtle);
+            line-height: 1.7;
+        }
+
+        /* OUTCOME */
+        .outcome {
+            padding: 80px 48px;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 2px;
+        }
+
+        .outcome-card {
+            padding: 60px 48px;
+            position: relative;
+            overflow: hidden;
+            transition: transform 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
+            z-index: 0;
+        }
+
+        .outcome-card:hover {
+            transform: scale(1.03);
+            z-index: 2;
+        }
+
+        .outcome-card.success {
+            background: var(--accent);
+        }
+
+        .outcome-card.fail {
+            background: var(--muted);
+        }
+
+        .outcome-card::before {
+            content: '';
+            position: absolute;
+            top: -60px;
+            right: -60px;
+            width: 200px;
+            height: 200px;
+            border-radius: 50%;
+            opacity: 0.08;
+        }
+
+        .outcome-card.success::before {
+            background: #fff;
+        }
+
+        .outcome-card.fail::before {
+            background: var(--fg);
+        }
+
+        .outcome-tag {
+            font-size: 10px;
+            letter-spacing: 0.2em;
+            text-transform: uppercase;
+            margin-bottom: 20px;
+            font-weight: 500;
+        }
+
+        .outcome-card.success .outcome-tag {
+            color: rgba(0, 0, 0, 0.5);
+        }
+
+        .outcome-card.fail .outcome-tag {
+            color: var(--subtle);
+        }
+
+        .outcome-title {
+            font-family: 'Syne', sans-serif;
+            font-weight: 800;
+            font-size: 36px;
+            line-height: 1;
+            margin-bottom: 24px;
+        }
+
+        .outcome-card.success .outcome-title {
+            color: var(--bg);
+        }
+
+        .outcome-card.fail .outcome-title {
+            color: var(--fg);
+        }
+
+        .outcome-items {
+            list-style: none;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .outcome-items li {
+            font-size: 12px;
+            display: flex;
+            align-items: flex-start;
+            gap: 10px;
+        }
+
+        .outcome-items li::before {
+            content: '→';
+            flex-shrink: 0;
+            margin-top: 1px;
+        }
+
+        .outcome-card.success .outcome-items li {
+            color: rgba(0, 0, 0, 0.65);
+        }
+
+        .outcome-card.fail .outcome-items li {
+            color: var(--subtle);
+        }
+
+        /* FOOTER */
+        footer {
+            padding: 40px 48px;
+            border-top: 1px solid var(--muted);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        footer p {
+            font-size: 11px;
+            color: var(--muted);
+        }
+
+        footer a {
+            font-size: 11px;
+            color: var(--subtle);
+            text-decoration: none;
+            letter-spacing: 0.1em;
+            display: inline-block;
+            transition: color 0.2s, transform 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+
+        footer a:hover {
+            color: var(--accent);
+            transform: scale(1.08);
+        }
+
+        /* ticker */
+        .ticker-wrap {
+            overflow: hidden;
+            border-bottom: 1px solid var(--muted);
+            border-top: 1px solid var(--muted);
+            padding: 10px 0;
+            background: #0d0d0d;
+        }
+
+        .ticker {
+            display: flex;
+            gap: 60px;
+            white-space: nowrap;
+            animation: ticker 20s linear infinite;
+            width: max-content;
+        }
+
+        .ticker span {
+            font-size: 10px;
+            letter-spacing: 0.15em;
+            text-transform: uppercase;
+            color: var(--subtle);
+        }
+
+        .ticker span b {
+            color: var(--accent);
+            font-weight: 400;
+        }
+
+        @keyframes ticker {
+            from {
+                transform: translateX(0);
+            }
+
+            to {
+                transform: translateX(-50%);
+            }
+        }
+
+        @keyframes fadeUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes fadeDown {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @media (max-width: 768px) {
+            nav {
+                padding: 20px 24px;
+            }
+
+            .hero {
+                padding: 80px 24px 60px;
+            }
+
+            .divider {
+                margin: 0 24px;
+            }
+
+            .flow {
+                padding: 60px 24px;
+            }
+
+            .steps {
+                grid-template-columns: 1fr 1fr;
+            }
+
+            .step:nth-child(2) {
+                border-right: none;
+            }
+
+            .step:nth-child(3) {
+                border-right: 1px solid var(--muted);
+            }
+
+            .step:nth-child(3),
+            .step:nth-child(4) {
+                border-top: 1px solid var(--muted);
+            }
+
+            .rules {
+                padding: 60px 24px;
+            }
+
+            .rules-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .outcome {
+                padding: 60px 24px;
+                grid-template-columns: 1fr;
+            }
+
+            footer {
+                padding: 28px 24px;
+                flex-direction: column;
+                gap: 12px;
+                text-align: center;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <nav>
+        <a class="logo" href="#">Raffle<span>.</span></a>
+        <div style="display:flex;align-items:center;gap:16px;">
+            <a href="https://twitter.com/0xkismet" target="_blank"
+                style="font-size:11px;letter-spacing:0.1em;color:var(--subtle);text-decoration:none;text-transform:uppercase;display:inline-block;transition:color 0.2s, transform 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);"
+                onmouseover="this.style.color='var(--fg)';this.style.transform='scale(1.08)'"
+                onmouseout="this.style.color='var(--subtle)';this.style.transform='scale(1)'">↗ Follow</a>
+            <a class="cta" href="https://app.kismet.today" target="_blank">Launch App ↗</a>
+        </div>
+    </nav>
+
+    <div class="ticker-wrap">
+        <div class="ticker">
+            <span>All or nothing &nbsp;<b>—</b></span>
+            <span>Full sell-out required &nbsp;<b>—</b></span>
+            <span>No middlemen &nbsp;<b>—</b></span>
+            <span>Anyone can close &nbsp;<b>—</b></span>
+            <span>Claim your winnings &nbsp;<b>—</b></span>
+            <span>Token payments only &nbsp;<b>—</b></span>
+            <span>Fair winner selection &nbsp;<b>—</b></span>
+            <span>All or nothing &nbsp;<b>—</b></span>
+            <span>Full sell-out required &nbsp;<b>—</b></span>
+            <span>No middlemen &nbsp;<b>—</b></span>
+            <span>Anyone can close &nbsp;<b>—</b></span>
+            <span>Claim your winnings &nbsp;<b>—</b></span>
+            <span>Token payments only &nbsp;<b>—</b></span>
+            <span>Fair winner selection &nbsp;<b>—</b></span>
+        </div>
+    </div>
+
+    <section class="hero">
+        <div class="hero-label">Onchain Raffle Protocol</div>
+        <h1>Simple rules.<br><em>Clear outcome.</em><br>No middlemen.</h1>
+        <p class="hero-sub">Sellers lock a prize. Buyers buy tickets. Either every ticket sells and winners are picked
+            automatically — or everyone gets their money back. That's it.</p>
+    </section>
+
+    <div class="divider"></div>
+
+    <section class="flow">
+        <div class="section-label">How it works</div>
+        <div class="steps">
+            <div class="step">
+                <div class="step-num">01</div>
+                <div class="step-title">Create & Lock</div>
+                <p>Seller sets the prize, ticket price, total tickets, duration, and winner count. The prize is locked —
+                    no one can touch it until it's over.</p>
+            </div>
+            <div class="step">
+                <div class="step-num">02</div>
+                <div class="step-title">Buy Tickets</div>
+                <p>Anyone can buy during the open window. Tickets can be gifted to another address. Per-account limits
+                    keep it fair.</p>
+            </div>
+            <div class="step">
+                <div class="step-num">03</div>
+                <div class="step-title">Finalize</div>
+                <p>After the end time, anyone can trigger finalization. Sold out = success. One ticket unsold = full
+                    refund. No judgment calls.</p>
+            </div>
+            <div class="step">
+                <div class="step-num">04</div>
+                <div class="step-title">Claim</div>
+                <p>Winners claim their prize share. Buyers claim refunds. Seller claims proceeds. Everything on-demand,
+                    nothing pushed automatically.</p>
+            </div>
+        </div>
+    </section>
+
+    <div class="divider"></div>
+
+    <section class="outcome">
+        <div class="outcome-card success">
+            <div class="outcome-tag">If fully sold out</div>
+            <div class="outcome-title">Raffle<br>Succeeds</div>
+            <ul class="outcome-items">
+                <li>Small protocol fee deducted</li>
+                <li>Seller receives ticket proceeds</li>
+                <li>Winners picked automatically from fixed onchain data</li>
+                <li>Each winner's share recorded immediately</li>
+            </ul>
+        </div>
+        <div class="outcome-card fail">
+            <div class="outcome-tag">If any ticket unsold</div>
+            <div class="outcome-title">Raffle<br>Fails</div>
+            <ul class="outcome-items">
+                <li>No fee collected</li>
+                <li>No winners selected</li>
+                <li>All buyers receive full refunds</li>
+                <li>Seller reclaims the prize</li>
+            </ul>
+        </div>
+    </section>
+
+    <div class="divider"></div>
+
+    <section class="rules">
+        <div class="section-label">Design choices</div>
+        <div class="rules-grid">
+            <div class="rule" style="animation-delay:0.05s">
+                <div class="rule-key">Success condition</div>
+                <div class="rule-val">All-or-nothing</div>
+                <div class="rule-why">One clear binary: every ticket sold, or full refund. No grey zones like "80% is
+                    enough."</div>
+            </div>
+            <div class="rule" style="animation-delay:0.1s">
+                <div class="rule-key">Payments</div>
+                <div class="rule-val">Tokens only</div>
+                <div class="rule-why">No native currency edge cases. Stablecoins or wrapped tokens keep the system
+                    clean.</div>
+            </div>
+            <div class="rule" style="animation-delay:0.15s">
+                <div class="rule-key">Settlement</div>
+                <div class="rule-val">Pull, not push</div>
+                <div class="rule-why">Winners and buyers claim themselves. No auto-sends that can fail or get exploited.
+                </div>
+            </div>
+            <div class="rule" style="animation-delay:0.2s">
+                <div class="rule-key">Randomness</div>
+                <div class="rule-val">Past, fixed data</div>
+                <div class="rule-why">Winner selection uses only data already on-chain. Unpredictable retroactively,
+                    verifiable forever.</div>
+            </div>
+            <div class="rule" style="animation-delay:0.25s">
+                <div class="rule-key">Who closes</div>
+                <div class="rule-val">Anyone can</div>
+                <div class="rule-why">Seller can't stall or refuse. Outcome depends only on the rules, not on who
+                    triggers the close.</div>
+            </div>
+            <div class="rule" style="animation-delay:0.3s">
+                <div class="rule-key">Multiple wins</div>
+                <div class="rule-val">Allowed</div>
+                <div class="rule-why">Each ticket is one independent chance. More tickets, more chances — including
+                    winning more than once.</div>
+            </div>
+        </div>
+    </section>
+
+    <footer>
+        <p>Built with simplicity and clarity in mind.</p>
+        <div style="display:flex;gap:24px;align-items:center;">
+            <a href="https://app.kismet.today" target="_blank">Launch App ↗</a>
+            <a href="https://twitter.com/0xkismet" target="_blank">@0xkismet ↗</a>
+        </div>
+    </footer>
+
+</body>
+
+</html>
